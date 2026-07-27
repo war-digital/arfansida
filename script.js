@@ -737,32 +737,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const initScrollReveal = () => {
         const revealElements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-left, .scroll-reveal-right, .scroll-reveal-fade");
         
-        // 1. Helper to immediately reveal elements near or in the viewport
+        // 1. Helper to reveal elements as they enter the viewport
         const checkAndReveal = () => {
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
             revealElements.forEach(el => {
                 const rect = el.getBoundingClientRect();
-                if (rect.top < viewportHeight + 150 && rect.bottom > -150) {
+                if (rect.top < viewportHeight - 20 && rect.bottom > 0) {
                     el.classList.add("revealed");
                 }
             });
         };
 
-        // Run immediately
+        // Run once on initialization for Hero and top elements
         checkAndReveal();
 
-        // 2. IntersectionObserver for smooth entrance when scrolling
+        // 2. IntersectionObserver for smooth entrance animation when scrolling
         const observerOptions = {
             root: null, // viewport
-            threshold: 0.01, // trigger as soon as 1% is visible
-            rootMargin: "80px 0px 80px 0px" // pre-reveal 80px before entering viewport
+            threshold: 0.1, // trigger as soon as 10% is visible
+            rootMargin: "0px 0px -20px 0px"
         };
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add("revealed");
-                    observer.unobserve(entry.target); // Stay revealed permanently
+                    observer.unobserve(entry.target); // Stay revealed once animated
                 }
             });
         }, observerOptions);
@@ -771,16 +771,8 @@ document.addEventListener("DOMContentLoaded", () => {
             observer.observe(el);
         });
 
-        // 3. Scroll Listener Fallback for mobile webviews where IntersectionObserver might lag
+        // 3. Scroll Listener Fallback to ensure instant responsiveness on all mobile browsers
         window.addEventListener("scroll", checkAndReveal, { passive: true });
-
-        // 4. Ultimate Safety Guarantee: Progressively reveal all remaining elements over 1 second
-        // so that NO section/slide can EVER stay hidden or blank under any browser conditions!
-        setTimeout(() => {
-            revealElements.forEach(el => {
-                el.classList.add("revealed");
-            });
-        }, 800);
     };
 
     // =================================================================

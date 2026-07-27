@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700&family=Sacramento&family=Great+Vibes&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.cdnfonts.com/css/brittany-signature');
 
 /* Custom Local Font: Bugis Lontara */
 @font-face {
@@ -29,6 +30,7 @@
     --font-serif: 'Playfair Display', 'Cinzel', serif;
     --font-sans: 'Montserrat', 'Inter', sans-serif;
     --font-accent: 'Great Vibes', cursive; /* Handwritten Cursive Font */
+    --font-brittany: 'Brittany Signature', 'Brittany', cursive; /* Brittany Signature Font */
     --transition-smooth: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     --shadow-premium: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.04);
     --shadow-gold: 0 0 15px rgba(212, 175, 55, 0.3);
@@ -953,11 +955,12 @@ body {
 }
 
 .couple-name {
-    font-family: 'Lontara', var(--font-serif); /* Custom Lontara font for couple names */
-    font-size: 1.6rem;
+    font-family: var(--font-brittany), 'Brittany Signature', 'Brittany', cursive;
+    font-size: 2.2rem;
     color: var(--color-brown-dark);
     margin-bottom: 0.8rem;
-    font-weight: 700;
+    font-weight: normal;
+    letter-spacing: 0.5px;
 }
 
 .couple-parent {
@@ -1876,8 +1879,15 @@ body {
 }
 
 .wedding-footer .section-container {
-    max-width: 280px; /* Constrains text width to keep it narrow, centered, and away from the ornaments */
+    max-width: 440px; /* Constrains text width to keep it centered and away from side ornaments */
+    width: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 5;
 }
 
 /* Footer Bottom Corner Ornaments */
@@ -1945,16 +1955,15 @@ body {
 
 .footer-names {
     font-family: 'Lontara', var(--font-serif); /* Custom Lontara font for couple names */
-    font-size: clamp(1.6rem, 8vw, 2.2rem); /* Scales dynamically on mobile to prevent overflow */
-    color: #FFFFFF;
-    margin-bottom: 0.4rem;
+    font-size: clamp(1.8rem, 7vw, 2.5rem); /* Scales dynamically on mobile */
+    color: #FFF2C2;
+    margin: 0 auto 0.5rem auto;
     letter-spacing: 1px;
     font-weight: 600;
-    white-space: nowrap; /* Guarantees the names stay on a single line */
-    display: inline-block; /* Set as inline-block to allow precise transform-based centering */
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%); /* Centered perfectly even when wider than parent container */
+    text-align: center;
+    width: 100%;
+    display: block;
+    white-space: nowrap;
 }
 
 .footer-family {
@@ -2146,36 +2155,36 @@ body {
 .scroll-reveal {
     opacity: 0;
     /* Soft slide up combined with a premium scale-up */
-    transform: scale(0.95) translateY(20px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.94) translateY(30px);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
 }
 
 .scroll-reveal-left {
     opacity: 0;
     /* Soft slide right combined with a premium scale-up */
-    transform: scale(0.95) translateX(-25px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.94) translateX(-35px);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
 }
 
 .scroll-reveal-right {
     opacity: 0;
     /* Soft slide left combined with a premium scale-up */
-    transform: scale(0.95) translateX(25px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.94) translateX(35px);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
 }
 
 .scroll-reveal-fade {
     opacity: 0;
     /* Pure, elegant scale-up zoom-in */
-    transform: scale(0.92);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.88);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
 }
 
@@ -2185,7 +2194,7 @@ body {
 .scroll-reveal-fade.revealed,
 .revealed {
     opacity: 1 !important;
-    transform: scale(1) translate(0) !important;
+    transform: scale(1) translate(0, 0) !important;
 }
 
 /* Delay modifiers */
