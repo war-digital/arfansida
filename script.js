@@ -74,7 +74,7 @@ const WEDDING_CONFIG = {
         { src: "g11.jpg", caption: "Melangkah Menuju Masa Depan" },
         { src: "g12.jpg", caption: "Terima Kasih Atas Doa Restu Anda" }
     ],
-    googleSheetUrl: "https://script.google.com/macros/s/AKfycbx5d-bt4F94GRRuys5XvEIz165clRYvz9AQwu4mvZ4Hqc_g8YgTPk9fCfmrkED2IF1h/exec" // Ganti dengan URL Web App Google Apps Script Anda jika ingin menyimpan ucapan ke Google Sheets
+    googleSheetUrl: "https://script.google.com/macros/s/AKfycbytfbAYg7rlZslTtz7aIzycGeDZI094nSzRfwNZtOxebTWpjtBBKAQVETNToF2l8sPppw/exec" // URL Database Google Sheets Baru
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -238,6 +238,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 coverScreen2.classList.remove("hidden");
                 // Start Cover 2 image slideshow
                 startSlideshow();
+                // Automatically animate couple name on Cover 2
+                const cover2Title = coverScreen2.querySelector(".couple-names-cover2");
+                if (cover2Title) {
+                    setTimeout(() => cover2Title.classList.add("revealed"), 400);
+                }
             }
         };
     };
@@ -336,6 +341,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         
                         // Start tracking elements for scroll reveal animations
                         initScrollReveal();
+                        
+                        // Automatically animate couple title on the first section (Hero) right after opening invitation
+                        const heroTitle = document.querySelector("#hero .couple-title");
+                        if (heroTitle) {
+                            setTimeout(() => heroTitle.classList.add("revealed"), 500);
+                        }
                     }, 100);
                 }
             });
@@ -521,34 +532,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const rsvpForm = document.getElementById("rsvp-form");
         const commentsList = document.getElementById("comments-list");
         
-        // Default mock wishes in case fetch fails or is not set up yet
-        let wishes = JSON.parse(localStorage.getItem("wedding_wishes")) || [
-            {
-                name: "Daeng Malewa",
-                status: "Hadir",
-                message: "Salama' ki napada salama', Arfan dan Sida. Semoga bahtera rumah tangga kalian dipenuhi berkah (*barakka*) dari Allah SWT, dilimpahi sakinah, mawaddah, warahmah. Amin.",
-                time: "2 jam yang lalu"
-            },
-            {
-                name: "Hj. Andi Bau",
-                status: "Hadir",
-                message: "Selamat menempuh hidup baru anakku. Semoga pernikahan ini menyatukan dua keluarga besar dengan penuh cinta dan kedamaian.",
-                time: "4 jam yang lalu"
-            },
-            {
-                name: "Irwan Saputra",
-                status: "Masih Ragu",
-                message: "Selamat Arfan & Sida! Doa terbaik dari kami sekeluarga di Makassar, semoga dimudahkan segalanya sampai hari H nanti.",
-                time: "1 hari yang lalu"
-            }
-        ];
+        // Clear any old local storage data for clean new database
+        localStorage.removeItem("wedding_wishes");
+        let wishes = [];
 
         const renderComments = () => {
-            // Clear current list except placeholder if list empty
+            // Clear current list
             commentsList.innerHTML = "";
             
             if (wishes.length === 0) {
-                commentsList.innerHTML = '<p class="text-muted text-center py-4">Belum ada ucapan. Jadilah yang pertama!</p>';
+                commentsList.innerHTML = '<p class="text-muted text-center py-4" style="text-align: center; color: var(--color-text-muted); padding: 2rem 0;">Belum ada ucapan. Jadilah yang pertama!</p>';
                 return;
             }
 
@@ -593,7 +586,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            fetch(WEDDING_CONFIG.googleSheetUrl)
+            // Tambahkan timestamp 't' agar browser selalu mengambil ucapan paling mutakhir tanpa cache
+            const fetchUrl = WEDDING_CONFIG.googleSheetUrl + (WEDDING_CONFIG.googleSheetUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+            fetch(fetchUrl)
                 .then(response => response.json())
                 .then(data => {
                     if (Array.isArray(data)) {
@@ -647,8 +643,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 .then(() => {
                     showToast("Ucapan & RSVP berhasil dikirim!");
                     rsvpForm.reset();
-                    // Give it a tiny delay for spreadsheet sync before reloading
-                    setTimeout(loadWishesFromGoogleSheets, 1500);
+                    
+                    // Tampilkan ucapan baru secara instan di layar tanpa menunggu reload
+                    wishes.push(newWish);
+                    renderComments();
+                    
+                    // Sinkronkan ulang data dari Google Sheets setelah sync spreadsheet
+                    setTimeout(loadWishesFromGoogleSheets, 2000);
                 })
                 .catch(err => {
                     console.error("Gagal mengirim ke Google Sheets:", err);
@@ -735,34 +736,50 @@ document.addEventListener("DOMContentLoaded", () => {
     // 10. SCROLL REVEAL ANIMATIONS (INTERSECTION OBSERVER)
     // =================================================================
     const initScrollReveal = () => {
-        const revealElements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-left, .scroll-reveal-right, .scroll-reveal-fade");
+        const revealElements = document.querySelectorAll(".scroll-reveal, .scroll-reveal-left, .scroll-reveal-right, .scroll-reveal-fade, .mempelai-text-anim");
         
-        // 1. Helper to reveal elements as they enter the viewport
+        let hasUserScrolled = false;
+
+        // 1. Helper to reveal elements as they enter the viewport upon scroll
         const checkAndReveal = () => {
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
             revealElements.forEach(el => {
+                // For mempelai text elements, ensure user has initiated scroll or element is scrolled into view
+                if (el.classList.contains("mempelai-text-anim") && !hasUserScrolled && window.scrollY < 10) {
+                    return;
+                }
                 const rect = el.getBoundingClientRect();
-                if (rect.top < viewportHeight - 20 && rect.bottom > 0) {
+                if (rect.top < viewportHeight - 30 && rect.bottom > 0) {
                     el.classList.add("revealed");
                 }
             });
         };
 
-        // Run once on initialization for Hero and top elements
-        checkAndReveal();
+        // Scroll listener trigger
+        const onScrollTrigger = () => {
+            if (window.scrollY > 5) {
+                hasUserScrolled = true;
+            }
+            checkAndReveal();
+        };
 
-        // 2. IntersectionObserver for smooth entrance animation when scrolling
+        window.addEventListener("scroll", onScrollTrigger, { passive: true });
+
+        // 2. IntersectionObserver for smooth entrance animation when scrolling into view
         const observerOptions = {
             root: null, // viewport
-            threshold: 0.1, // trigger as soon as 10% is visible
-            rootMargin: "0px 0px -20px 0px"
+            threshold: 0.15, // trigger when 15% visible
+            rootMargin: "0px 0px -30px 0px"
         };
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    if (entry.target.classList.contains("mempelai-text-anim") && !hasUserScrolled && window.scrollY < 10) {
+                        return;
+                    }
                     entry.target.classList.add("revealed");
-                    observer.unobserve(entry.target); // Stay revealed once animated
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
@@ -771,8 +788,8 @@ document.addEventListener("DOMContentLoaded", () => {
             observer.observe(el);
         });
 
-        // 3. Scroll Listener Fallback to ensure instant responsiveness on all mobile browsers
-        window.addEventListener("scroll", checkAndReveal, { passive: true });
+        // Run once on load for static elements (mempelai texts wait for scroll)
+        checkAndReveal();
     };
 
     // =================================================================
@@ -799,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 const datesParam = `${formatCalendarDate(startDate)}/${formatCalendarDate(endDate)}`;
                 
-                const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${datesParam}&details=${encodeURIComponent("Pernikahan Suci Aznur & Masna - Mohon doa restu Anda.")}&location=${encodeURIComponent(loc)}&sf=true&output=xml`;
+                const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${datesParam}&details=${encodeURIComponent("Pernikahan Suci Arfan & Sida - Mohon doa restu Anda.")}&location=${encodeURIComponent(loc)}&sf=true&output=xml`;
                 
                 window.open(googleCalUrl, "_blank");
             });
